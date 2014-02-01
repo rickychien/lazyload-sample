@@ -2,11 +2,53 @@
 <html>
 <head>
   <title>Lazyload Sample Test</title>
+  <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css">
+  <link rel="stylesheet" type="text/css" href="/app/style/common.css">
   <script src="/bower_components/mocha/mocha.js"></script>
   <script src="/bower_components/blanket/dist/qunit/blanket.js"
     data-cover-adapter="/bower_components/blanket/src/adapters/mocha-blanket.js"></script>
+  <script>
+    mocha.setup('bdd');
+
+    // Define simple version assert
+    function assert(expr) {
+      var error;
+      if (!expr) {
+        error = new Error('Assertion failed');
+        console.error(error.stack);
+      }
+    }
+  </script>
 </head>
 <body>
+  <div id="mocha"></div>
   <h1>Lazyload Sample Test</h1>
+  <div id="sample1">
+    <h3>HTML Script</h3>
+    <script src="/app/js/sample1.js"></script>
+    <script src="/test/unit/sample1-test.js"></script>
+  </div>
+  <div id="sample2">
+    <h3>HTML Script (Async)</h3>
+    <script src="/app/js/sample2.js" async></script>
+  </div>
+  <div id="sample3">
+    <h3>HTML Script (Defer)</h3>
+    <script src="/app/js/sample3.js" defer></script>
+  </div>
+  <div id="sample4">
+    <h3>XHR (Ajax)</h3>
+    <script src="/app/js/xhr.js"></script>
+  </div>
+  <div id="sample5">
+    <h3>Head.appendChild</h3>
+    <script src="/app/js/append-child.js"></script>
+  </div>
+  <div id="sample6">
+    <h3>Load on demand</h3>
+    <button>Click here to load script</button>
+    <script src="/app/js/load-on-demand.js"></script>
+  </div>
+  <script>mocha.run();</script>
 </body>
 </html>

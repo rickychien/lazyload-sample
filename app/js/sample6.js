@@ -1,7 +1,27 @@
-(function () {
-  var target = document.querySelector('#sample6'),
+(function (exports) {
+  'use strict';
+
+  function Sample () {
+    this.target = '#sample6';
+    this.message = 'Hello World!';
+  }
+
+  Sample.prototype = {
+
+    greet: function () {
+      return this.message;
+    },
+
+    show: function () {
+      var target = document.querySelector(this.target),
       label = document.createElement('label');
 
-  label.innerHTML = 'Hello World!';
-  target.appendChild(label);
-})();
+      label.innerHTML = this.greet();
+      target.appendChild(label);
+    }
+
+  };
+
+  exports.Sample6 = Sample;
+
+})(this);
