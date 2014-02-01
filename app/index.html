@@ -2,10 +2,34 @@
 <html>
 <head>
   <title>Lazyload Sample</title>
+  <link rel="stylesheet" type="text/css" href="style/common.css">
 </head>
 <body>
   <h1>Lazyload Sample</h1>
-  <br>
-  <h3>HTML Script</h3>
+  <div id="sample1">
+    <h3>HTML Script</h3>
+    <script src="js/sample1.js"></script>
+  </div>
+  <div id="sample2">
+    <h3>HTML Script (Async)</h3>
+    <script src="js/sample2.js" async></script>
+  </div>
+  <div id="sample3">
+    <h3>HTML Script (Defer)</h3>
+    <script src="js/sample3.js" defer></script>
+  </div>
+  <div id="sample4">
+    <h3>XHR (Ajax)</h3>
+    <script src="js/xhr.js"></script>
+  </div>
+  <div id="sample5">
+    <h3>Head.appendChild</h3>
+    <script src="js/append-child.js"></script>
+  </div>
+  <div id="sample6">
+    <h3>Load on demand</h3>
+    <button>Click here to load script</button>
+    <script src="js/load-on-demand.js"></script>
+  </div>
 </body>
 </html>
