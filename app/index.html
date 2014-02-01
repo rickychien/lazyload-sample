@@ -22,63 +22,41 @@
     </div>
 
     <div id="sample2">
-      <h3>HTML Script (Async)</h3>
-      <script>
-        function loadAsync() {
-          var sample2 = new Sample2();
-          sample2.show();
-        }
-      </script>
-      <script src="/app/js/sample2.js" onload="loadAsync();" async></script>
-    </div>
-
-    <div id="sample3">
-      <h3>HTML Script (Defer)</h3>
-      <script>
-        function loadDefer () {
-          var sample3 = new Sample3();
-          sample3.show();
-        }
-      </script>
-      <script src="/app/js/sample3.js" onload="loadDefer();" defer></script>
-    </div>
-
-    <div id="sample4">
       <h3>XHR (Ajax)</h3>
       <script src="/app/js/xhr-loader.js"></script>
       <script>
         (function () {
           var xhrLoader = new XHRLoader();
-          xhrLoader.load('/app/js/sample4.js', function () {
-            var sample4 = new Sample4();
-            sample4.show();
+          xhrLoader.load('/app/js/sample2.js', function () {
+            var sample2 = new Sample2();
+            sample2.show();
           });
         })();
       </script>
     </div>
 
-    <div id="sample5">
+    <div id="sample3">
       <h3>Head.appendChild</h3>
       <script src="/app/js/script-loader.js"></script>
       <script>
         (function () {
           var scriptLoader = new ScriptLoader();
-          scriptLoader.load('/app/js/sample5.js', function () {
-            var sample5 = new Sample5();
-            sample5.show();
+          scriptLoader.load('/app/js/sample3.js', function () {
+            var sample3 = new Sample3();
+            sample3.show();
           });
         })();
       </script>
     </div>
 
-    <div id="sample6">
+    <div id="sample4">
       <h3>Load on demand</h3>
       <script>
         function loadOnDemand () {
           var scriptLoader = new ScriptLoader();
-          scriptLoader.load('/app/js/sample6.js', function () {
-            var sample6 = new Sample6();
-            sample6.show();
+          scriptLoader.load('/app/js/sample4.js', function () {
+            var sample4 = new Sample4();
+            sample4.show();
           });
         }
       </script>

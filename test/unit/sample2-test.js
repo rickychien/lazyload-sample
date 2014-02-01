@@ -1,19 +1,19 @@
 'use strict';
 
-require('/app/js/sample1.js');
+require('/app/js/sample2-xhr.js');
 
-suite('Sample1', function () {
+suite('Sample2', function () {
   var sample,
       message = 'Hello World!';
 
   setup(function () {
-    sample = new Sample1();
+    sample = new Sample2();
   });
 
   suite('#constructor', function () {
 
     test('should be initialized correctly', function () {
-      assert(sample.target === '#sample1');
+      assert(sample.target === '#sample2');
       assert(sample.message === message);
     });
 
@@ -34,10 +34,9 @@ suite('Sample1', function () {
       
       sample.show();
 
-      target = document.querySelector('#sample1 label');
+      target = document.querySelector('#sample2 label');
       assert(target.innerHTML === message)
     });
 
   });
 });
-

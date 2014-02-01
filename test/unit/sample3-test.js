@@ -1,19 +1,21 @@
 'use strict';
 
-require('/app/js/sample1.js');
+require('/app/js/sample3-append.js');
 
-suite('Sample1', function () {
-  var sample,
-      message = 'Hello World!';
+suite('Sample3', function () {
 
-  setup(function () {
-    sample = new Sample1();
+  var message = 'Hello World!',
+      sample;
+
+  suiteSetup(function () {
+    require('/app/js/sample3.js');
+    sample = new Sample3();
   });
 
   suite('#constructor', function () {
 
     test('should be initialized correctly', function () {
-      assert(sample.target === '#sample1');
+      assert(sample.target === '#sample3');
       assert(sample.message === message);
     });
 
@@ -34,10 +36,9 @@ suite('Sample1', function () {
       
       sample.show();
 
-      target = document.querySelector('#sample1 label');
+      target = document.querySelector('#sample3 label');
       assert(target.innerHTML === message)
     });
 
   });
 });
-

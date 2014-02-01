@@ -10,7 +10,7 @@
     load: function (url, callback) {
       var xhr = XMLHttpRequest();
 
-      xhr.open('GET', url);
+      xhr.open('GET', url, true);
 
       xhr.onload = function () {
         // Execute response script
@@ -26,6 +26,6 @@
 
   };
   
-  exports.XHRLoader = XHRLoader;
+  (new XHRLoader()).load('/app/js/sample2.js');
 
 })(this);

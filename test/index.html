@@ -2,104 +2,50 @@
 <html>
 <head>
   <title>Lazyload Sample Test</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css">
   <link rel="stylesheet" type="text/css" href="/app/style/common.css">
   <script src="/bower_components/mocha/mocha.js"></script>
-  <script src="/bower_components/blanket/dist/qunit/blanket.js"
-    data-cover-adapter="/bower_components/blanket/src/adapters/mocha-blanket.js"></script>
+  <script src="/test/lib/common-loader.js"></script>
   <script>
-    mocha.setup('bdd');
+    mocha.setup('tdd');
 
     // Define simple version assert
     function assert(expr) {
-      var error;
       if (!expr) {
-        error = new Error('Assertion failed');
-        console.error(error.stack);
+        throw new Error('failed');
       }
     }
+
+    var commonLoader = new CommonLoader();
+    require = commonLoader.require;
   </script>
 </head>
 <body>
   <div id="mocha"></div>
-  
+
   <h1>Lazyload Sample Test</h1>
 
   <div id="container">
 
     <div id="sample1">
       <h3>HTML Script</h3>
-      <script src="/app/js/sample1.js"></script>
-      <script>
-        (function () {
-          var sample1 = new Sample1();
-          sample1.show();
-        })();
-      </script>
+      <script src="/test/unit/sample1-test.js"></script>
     </div>
 
     <div id="sample2">
-      <h3>HTML Script (Async)</h3>
-      <script>
-        function loadAsync() {
-          var sample2 = new Sample2();
-          sample2.show();
-        }
-      </script>
-      <script src="/app/js/sample2.js" onload="loadAsync();" async></script>
+      <h3>XHR (Ajax)</h3>
+      <script src="/test/unit/sample2-test.js"></script>
     </div>
 
     <div id="sample3">
-      <h3>HTML Script (Defer)</h3>
-      <script>
-        function loadDefer () {
-          var sample3 = new Sample3();
-          sample3.show();
-        }
-      </script>
-      <script src="/app/js/sample3.js" onload="loadDefer();" defer></script>
+      <h3>Head.appendChild</h3>
+      <script src="/test/unit/sample3-test.js"></script>
     </div>
 
     <div id="sample4">
-      <h3>XHR (Ajax)</h3>
-      <script src="/app/js/xhr-loader.js"></script>
-      <script>
-        (function () {
-          var xhrLoader = new XHRLoader();
-          xhrLoader.load('/app/js/sample4.js', function () {
-            var sample4 = new Sample4();
-            sample4.show();
-          });
-        })();
-      </script>
-    </div>
-
-    <div id="sample5">
-      <h3>Head.appendChild</h3>
-      <script src="/app/js/script-loader.js"></script>
-      <script>
-        (function () {
-          var scriptLoader = new ScriptLoader();
-          scriptLoader.load('/app/js/sample5.js', function () {
-            var sample5 = new Sample5();
-            sample5.show();
-          });
-        })();
-      </script>
-    </div>
-
-    <div id="sample6">
       <h3>Load on demand</h3>
-      <script>
-        function loadOnDemand () {
-          var scriptLoader = new ScriptLoader();
-          scriptLoader.load('/app/js/sample6.js', function () {
-            var sample6 = new Sample6();
-            sample6.show();
-          });
-        }
-      </script>
-      <button onclick="loadOnDemand();">Click here to load script</button>
+      <script src="/test/unit/sample4-test.js"></script>
     </div>
     
   </div>
