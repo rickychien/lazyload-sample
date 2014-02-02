@@ -1,27 +1,37 @@
 (function (exports) {
   'use strict';
 
-  function Sample () {
-    this.target = '#sample2';
-    this.message = 'Hello World!';
+  function XHRLoader() {
+
   }
 
-  Sample.prototype = {
+  XHRLoader.prototype = {
 
-    greet: function () {
-      return this.message;
+    load: function (url, callback) {
+      var xhr = XMLHttpRequest();
+
+      xhr.open('GET', url, true);
+
+      xhr.onload = function () {
+        // Execute response script
+        window.eval(xhr.response);
+
+        if (callback) {
+          callback();
+        }
+      };
+
+      xhr.send();
     },
 
     show: function () {
-      var target = document.querySelector(this.target),
-      label = document.createElement('label');
-
-      label.innerHTML = this.greet();
-      target.appendChild(label);
+      if (typeof Welcome === 'function') {
+        (new Welcome('#sample2', 'I am sample2')).greets();
+      }
     }
 
   };
 
-  exports.Sample2 = Sample;
+  exports.Sample2 = XHRLoader;
 
 })(this);

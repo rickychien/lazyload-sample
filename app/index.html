@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Lazyload Sample</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" type="text/css" href="style/common.css">
 </head>
 <body>
@@ -12,55 +13,54 @@
 
     <div id="sample1">
       <h3>HTML Script</h3>
+      <script src="/app/js/welcome.js"></script>
       <script src="/app/js/sample1.js"></script>
       <script>
         (function () {
-          var sample1 = new Sample1();
-          sample1.show();
+          (new Sample1()).show();
+
+          delete window.Welcome;
         })();
       </script>
     </div>
 
     <div id="sample2">
       <h3>XHR (Ajax)</h3>
-      <script src="/app/js/xhr-loader.js"></script>
+      <script src="/app/js/sample2.js"></script>
       <script>
         (function () {
-          var xhrLoader = new XHRLoader();
-          xhrLoader.load('/app/js/sample2.js', function () {
-            var sample2 = new Sample2();
-            sample2.show();
-          });
+          var sample = new Sample2();
+          sample.load('/app/js/welcome.js', sample.show);
+
+          delete window.Welcome;
         })();
       </script>
     </div>
 
     <div id="sample3">
       <h3>Head.appendChild</h3>
-      <script src="/app/js/script-loader.js"></script>
+      <script src="/app/js/sample3.js"></script>
       <script>
         (function () {
-          var scriptLoader = new ScriptLoader();
-          scriptLoader.load('/app/js/sample3.js', function () {
-            var sample3 = new Sample3();
-            sample3.show();
-          });
+          var sample = new Sample3();
+          sample.load('/app/js/welcome.js', sample.show);
+
+          delete window.Welcome;
         })();
       </script>
     </div>
 
     <div id="sample4">
       <h3>Load on demand</h3>
+      <script src="/app/js/sample4.js"></script>
       <script>
-        function loadOnDemand () {
-          var scriptLoader = new ScriptLoader();
-          scriptLoader.load('/app/js/sample4.js', function () {
-            var sample4 = new Sample4();
-            sample4.show();
-          });
-        }
+        (function () {
+          var sample = new Sample4();
+          sample.register('/app/js/welcome.js', sample.show);
+
+          delete window.Welcome;
+        })();
       </script>
-      <button onclick="loadOnDemand();">Click here to load script</button>
     </div>
     
   </div>

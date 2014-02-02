@@ -1,27 +1,30 @@
 (function (exports) {
   'use strict';
 
-  function Sample () {
-    this.target = '#sample3';
-    this.message = 'Hello World!';
+  function ScriptLoader() {
+
   }
 
-  Sample.prototype = {
+  ScriptLoader.prototype = {
 
-    greet: function () {
-      return this.message;
+    load: function (url, callback) {
+      var script = document.createElement('script');
+
+      script.src = url;
+
+      script.onload = callback;
+
+      document.querySelector('head').appendChild(script);
     },
 
     show: function () {
-      var target = document.querySelector(this.target),
-      label = document.createElement('label');
-
-      label.innerHTML = this.greet();
-      target.appendChild(label);
+      if (typeof Welcome === 'function') {
+        (new Welcome('#sample3', 'I am sample3')).greets();
+      }
     }
 
   };
 
-  exports.Sample3 = Sample;
+  exports.Sample3 = ScriptLoader;
 
 })(this);

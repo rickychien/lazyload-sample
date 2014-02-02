@@ -1,36 +1,49 @@
 'use strict';
 
-require('/app/js/sample4-onclick.js');
-
 suite('Sample4', function () {
 
-  var btnClickReg = new BtnClickRegister(),
-      message = 'Hello World!';
+  var sample;
 
-  suite('BtnClickRegister', function () {
+  suiteSetup(function () {
+    sample = new Sample4();
+  });
 
-    suite('#register', function () {
+  suiteTeardown(function () {
+    delete window.Welcome;
+  });
 
-      test('should append a button', function () {
-        var button;
+  teardown(function () {
+    document.querySelector('#sample4 button').remove();
+  });
 
-        btnClickReg.register();
-        button = document.querySelector('button');
+  suite('#register', function () {
 
-        assert(button !== null);
-        assert(button.innerHTML === 'Click here to load script');
+    test('should append a button to #sample4 div', function () {
+      var button;
+
+      sample.register('/app/js/welcome.js');
+
+      button = document.querySelector('#sample4 button');
+
+      assert(button !== null);
+      assert(button.innerHTML === 'Click here to load script');
+    });
+
+    test('should append a message to #sample4 div when button was clicked', function (done) {
+      sample.register('/app/js/welcome.js', function () {
+        var target;
+
+        sample.show();
+
+        target = document.querySelector('#sample4 label');
+
+        assert(target !== null);
+        assert(target.innerHTML === 'I am sample4');
+
+        done();
       });
 
-      test('should start load script when button is clicked', function () {
-        var button = document.querySelector('button');
-
-        assert(typeof Sample4 !== 'function');
-
-        button.click();
-
-        assert(typeof Sample4 === 'function');
-      });
-
+      sample.button.click();
     });
 
   });

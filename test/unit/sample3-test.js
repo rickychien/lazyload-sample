@@ -1,44 +1,34 @@
 'use strict';
 
-require('/app/js/sample3-append.js');
-
 suite('Sample3', function () {
 
-  var message = 'Hello World!',
-      sample;
+  var sample;
 
   suiteSetup(function () {
-    require('/app/js/sample3.js');
     sample = new Sample3();
   });
 
-  suite('#constructor', function () {
-
-    test('should be initialized correctly', function () {
-      assert(sample.target === '#sample3');
-      assert(sample.message === message);
-    });
-
-  });
-
-  suite('#greet', function () {
-
-    test('should return "Hello World!"', function () {
-      assert(sample.greet() === message);
-    });
-
+  suiteTeardown(function () {
+    delete window.Welcome;
   });
 
   suite('#show', function () {
 
-    test('should append "Hello World!" to HTML', function () {
-      var target;
-      
-      sample.show();
+    test('should append a message to #sample3 div', function (done) {
+      sample.load('/app/js/welcome.js', function () {
+        var target;
 
-      target = document.querySelector('#sample3 label');
-      assert(target.innerHTML === message)
+        sample.show();
+
+        target = document.querySelector('#sample3 label');
+
+        assert(target !== null);
+        assert(target.innerHTML === 'I am sample3');
+
+        done();
+      });
     });
 
   });
+
 });

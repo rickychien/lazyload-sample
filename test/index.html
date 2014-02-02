@@ -6,7 +6,10 @@
   <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css">
   <link rel="stylesheet" type="text/css" href="/app/style/common.css">
   <script src="/bower_components/mocha/mocha.js"></script>
-  <script src="/test/lib/common-loader.js"></script>
+  <!--
+  <script src="/bower_components/blanket/dist/qunit/blanket.js"
+    data-cover-adapter="/bower_components/blanket/src/adapters/mocha-blanket.js"></script>
+  -->
   <script>
     mocha.setup('tdd');
 
@@ -16,35 +19,35 @@
         throw new Error('failed');
       }
     }
-
-    var commonLoader = new CommonLoader();
-    require = commonLoader.require;
   </script>
 </head>
 <body>
   <div id="mocha"></div>
 
-  <h1>Lazyload Sample Test</h1>
-
   <div id="container">
 
     <div id="sample1">
       <h3>HTML Script</h3>
+      <script src="/app/js/welcome.js"></script>
+      <script src="/app/js/sample1.js"></script>
       <script src="/test/unit/sample1-test.js"></script>
     </div>
 
     <div id="sample2">
       <h3>XHR (Ajax)</h3>
+      <script src="/app/js/sample2.js"></script>
       <script src="/test/unit/sample2-test.js"></script>
     </div>
 
     <div id="sample3">
       <h3>Head.appendChild</h3>
+      <script src="/app/js/sample3.js"></script>
       <script src="/test/unit/sample3-test.js"></script>
     </div>
 
     <div id="sample4">
       <h3>Load on demand</h3>
+      <script src="/app/js/sample4.js"></script>
       <script src="/test/unit/sample4-test.js"></script>
     </div>
     
