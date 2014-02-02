@@ -4,12 +4,8 @@
   <title>Lazyload Sample Test</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" type="text/css" href="/test/lib/vendor/mocha/mocha.css">
-  <link rel="stylesheet" type="text/css" href="/app/style/common.css">
   <script src="/test/lib/vendor/mocha/mocha.js"></script>
-  <!--
-  <script src="/test/lib/vendor/blanket/blanket.js"
-    data-cover-adapter="/test/lib/vendor/blanket/adapters/mocha-blanket.js"></script>
-  -->
+  <script src="/test/lib/vendor/blanket/blanket_mocha.js" data-cover-only="/app/js/"></script>
   <script>
     mocha.setup('tdd');
 
@@ -29,7 +25,7 @@
     <div id="sample1">
       <h3>HTML Script</h3>
       <script src="/app/js/welcome.js"></script>
-      <script src="/app/js/sample1.js" data-cover></script>
+      <script src="/app/js/sample1.js"></script>
       <script src="/test/unit/sample1-test.js"></script>
     </div>
 
@@ -53,6 +49,10 @@
     
   </div>
 
-  <script>mocha.run();</script>
+  <script>
+    window.onload = function () {
+      mocha.run();
+    };
+  </script>
 </body>
 </html>
