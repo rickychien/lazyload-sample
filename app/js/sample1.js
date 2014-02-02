@@ -2,7 +2,7 @@
   'use strict';
 
   function Sample () {
-    this.welcome = new Welcome('#sample1', 'I am sample1');
+    this.welcome = new Welcome1('#sample1', 'I am sample1');
   }
 
   Sample.prototype = {

@@ -24,6 +24,6 @@
 
   };
 
-  exports.Welcome = Welcome;
+  exports.Welcome1 = Welcome;
 
 })(this);

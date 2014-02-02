@@ -8,10 +8,6 @@ suite('Sample1', function () {
     sample = new Sample1();
   });
 
-  suiteTeardown(function () {
-    delete window.Welcome;
-  });
-
   suite('#show', function () {
 
     test('should append a message to #sample1 div', function () {

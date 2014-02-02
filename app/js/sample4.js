@@ -28,8 +28,8 @@
     },
 
     show: function () {
-      if (typeof Welcome === 'function') {
-        (new Welcome('#sample4', 'I am sample4')).greets();
+      if (typeof Welcome4 === 'function') {
+        (new Welcome4('#sample4', 'I am sample4')).greets();
       }
     },
 

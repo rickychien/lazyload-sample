@@ -13,13 +13,11 @@
 
     <div id="sample1">
       <h3>HTML Script</h3>
-      <script src="/app/js/welcome.js"></script>
+      <script src="/app/js/welcome1.js"></script>
       <script src="/app/js/sample1.js"></script>
       <script>
         (function () {
           (new Sample1()).show();
-
-          delete window.Welcome;
         })();
       </script>
     </div>
@@ -30,9 +28,7 @@
       <script>
         (function () {
           var sample = new Sample2();
-          sample.load('/app/js/welcome.js', sample.show);
-
-          delete window.Welcome;
+          sample.load('/app/js/welcome2.js', sample.show);
         })();
       </script>
     </div>
@@ -43,9 +39,7 @@
       <script>
         (function () {
           var sample = new Sample3();
-          sample.load('/app/js/welcome.js', sample.show);
-
-          delete window.Welcome;
+          sample.load('/app/js/welcome3.js', sample.show);
         })();
       </script>
     </div>
@@ -56,9 +50,7 @@
       <script>
         (function () {
           var sample = new Sample4();
-          sample.register('/app/js/welcome.js', sample.show);
-
-          delete window.Welcome;
+          sample.register('/app/js/welcome4.js', sample.show);
         })();
       </script>
     </div>

@@ -18,8 +18,8 @@
     },
 
     show: function () {
-      if (typeof Welcome === 'function') {
-        (new Welcome('#sample3', 'I am sample3')).greets();
+      if (typeof Welcome3 === 'function') {
+        (new Welcome3('#sample3', 'I am sample3')).greets();
       }
     }
 

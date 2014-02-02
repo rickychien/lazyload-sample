@@ -8,10 +8,6 @@ suite('Sample4', function () {
     sample = new Sample4();
   });
 
-  suiteTeardown(function () {
-    delete window.Welcome;
-  });
-
   teardown(function () {
     document.querySelector('#sample4 button').remove();
   });
@@ -21,7 +17,7 @@ suite('Sample4', function () {
     test('should append a button to #sample4 div', function () {
       var button;
 
-      sample.register('/app/js/welcome.js');
+      sample.register('/app/js/welcome4.js');
 
       button = document.querySelector('#sample4 button');
 
@@ -30,7 +26,7 @@ suite('Sample4', function () {
     });
 
     test('should append a message to #sample4 div when button was clicked', function (done) {
-      sample.register('/app/js/welcome.js', function () {
+      sample.register('/app/js/welcome4.js', function () {
         var target;
 
         sample.show();

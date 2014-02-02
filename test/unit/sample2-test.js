@@ -8,14 +8,10 @@ suite('Sample2', function () {
     sample = new Sample2();
   });
 
-  suiteTeardown(function () {
-    delete window.Welcome;
-  });
-
   suite('#show', function () {
 
     test('should append a message to #sample2 div', function (done) {
-      sample.load('/app/js/welcome.js', function () {
+      sample.load('/app/js/welcome2.js', function () {
         var target;
 
         sample.show();

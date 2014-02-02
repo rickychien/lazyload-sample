@@ -25,8 +25,8 @@
     },
 
     show: function () {
-      if (typeof Welcome === 'function') {
-        (new Welcome('#sample2', 'I am sample2')).greets();
+      if (typeof Welcome2 === 'function') {
+        (new Welcome2('#sample2', 'I am sample2')).greets();
       }
     }
 
