@@ -3,12 +3,12 @@
 <head>
   <title>Lazyload Sample Test</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <link rel="stylesheet" type="text/css" href="/bower_components/mocha/mocha.css">
+  <link rel="stylesheet" type="text/css" href="/node_modules/mocha/mocha.css">
   <link rel="stylesheet" type="text/css" href="/app/style/common.css">
-  <script src="/bower_components/mocha/mocha.js"></script>
+  <script src="/node_modules/mocha/mocha.js"></script>
   <!--
-  <script src="/bower_components/blanket/dist/qunit/blanket.js"
-    data-cover-adapter="/bower_components/blanket/src/adapters/mocha-blanket.js"></script>
+  <script src="/node_modules/blanket/dist/qunit/blanket.js"
+    data-cover-adapter="/node_modules/blanket/src/adapters/mocha-blanket.js"></script>
   -->
   <script>
     mocha.setup('tdd');
@@ -29,7 +29,7 @@
     <div id="sample1">
       <h3>HTML Script</h3>
       <script src="/app/js/welcome.js"></script>
-      <script src="/app/js/sample1.js"></script>
+      <script src="/app/js/sample1.js" data-cover></script>
       <script src="/test/unit/sample1-test.js"></script>
     </div>
 

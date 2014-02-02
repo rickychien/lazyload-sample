@@ -1,0 +1,11 @@
+{
+  "name": "lazyload-sample",
+  "private": true,
+  "version": "0.0.1",
+  "description": "A sample project for testing lazy load coverage",
+  "author": "Ricky Chien <ricky060709@gmail.com>",
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "blanket": "~1.1.6"
+  }
+}
