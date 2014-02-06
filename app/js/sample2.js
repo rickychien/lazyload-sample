@@ -8,7 +8,7 @@
   XHRLoader.prototype = {
 
     load: function (url, callback) {
-      var xhr = XMLHttpRequest();
+      var xhr = new XMLHttpRequest();
 
       xhr.open('GET', url, true);
 
