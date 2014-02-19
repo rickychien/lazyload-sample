@@ -4128,7 +4128,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             // check instrumented hash table,
             // return instrumented code if available.
             var inFile = config.inputFile,
-                inFileName = config.inputFileName;
+                inFileName = config.inputFileName,
+                instrumented;
 
             // check instrument cache
             if (_blanket.options("instrumentCache") && sessionStorage && sessionStorage.getItem("blanket_instrument_store-" + inFileName)) {
@@ -4136,14 +4137,14 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     console.log("BLANKET-Reading instrumentation from cache: ", inFileName);
                 }
 
-                next(sessionStorage.getItem("blanket_instrument_store-" + inFileName));
+                instrumented = sessionStorage.getItem("blanket_instrument_store-" + inFileName);
             } else {
                 var sourceArray = _blanket._prepareSource(inFile);
                 _blanket._trackingArraySetup = [];
                 // remove shebang
                 inFile = inFile.replace(/^\#\!.*/, "");
 
-                var instrumented = parseAndModify(inFile, {
+                instrumented = parseAndModify(inFile, {
                     loc: true,
                     comment: true
                 }, _blanket._addTracking(inFileName));
@@ -4164,9 +4165,13 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                     }
                     sessionStorage.setItem("blanket_instrument_store-" + inFileName, instrumented);
                 }
+            }
 
+            if (next) {
                 next(instrumented);
             }
+
+            return instrumented;
         },
 
         _trackingArraySetup: [],
@@ -5221,26 +5226,26 @@ blanket.defaultReporter = function(coverage) {
                 _blanket._addScript(data);
             },
 
+            filter: function (scripts) {
+                var toArray = Array.prototype.slice,
+                    filter = _blanket.options('filter'),
+                    antifilter = _blanket.options("antifilter");
+
+                return toArray.call(scripts).filter(function(script) {
+                    return _blanket.utils.matchPatternAttribute(script.src, filter) &&
+                        (typeof antifilter === "undefined" || !_blanket.utils.matchPatternAttribute(script.src, antifilter));
+                });
+            },
+
             collectPageScripts: function() {
                 var toArray = Array.prototype.slice,
                     selectedScripts = [],
                     scriptNames = [],
                     filter = _blanket.options("filter");
 
-                if (filter) {
-                    // global filter in place, data-cover-only
-                    var antimatch = _blanket.options("antifilter");
-
-                    selectedScripts = toArray.call(document.scripts)
-                        .filter(function(s) {
-                            return toArray.call(s.attributes).filter(function(sn) {
-                                return sn.nodeName === "src" && _blanket.utils.matchPatternAttribute(sn.nodeValue, filter) &&
-                                    (typeof antimatch === "undefined" || !_blanket.utils.matchPatternAttribute(sn.nodeValue, antimatch));
-                            }).length === 1;
-                        });
-                } else {
-                    selectedScripts = toArray.call(document.querySelectorAll("script[data-cover]"));
-                }
+                selectedScripts = filter ?
+                    this.filter(toArray.call(document.scripts)) :
+                    toArray.call(document.querySelectorAll("script[data-cover]"));
 
                 scriptNames = selectedScripts.map(function(s) {
                     return _blanket.utils.qualifyURL(
@@ -5576,28 +5581,38 @@ blanket.defaultReporter = function(coverage) {
 
         // Detect src paramenter of document.createElement whether src has been
         // instrumented. If exist use instrumented, otherwise load it as default.
-        var originalCall = window.document.createElement;
+        var original = window.HTMLElement.prototype.appendChild;
 
-        window.document.createElement = function(tagName) {
-            var element = originalCall.call(document, tagName);
+        window.HTMLElement.prototype.appendChild = function(child) {
+            var url = blanket.utils.qualifyURL(child.src),
+                cacheUrl = 'blanket_instrument_store-' + url,
+                instrumented = sessionStorage[cacheUrl],
+                xhr;
 
-            if (tagName === 'script') {
-                Object.defineProperty(HTMLScriptElement.prototype, 'src', {
-                    set: function (src) {
-                        src = (src.indexOf('://') === -1) ? blanket.utils.qualifyURL(src) : src;
+            if (child.tagName === 'SCRIPT' && _blanket.utils.filter([child]).length > 0) {
+                if (!instrumented) {
+                    xhr = new XMLHttpRequest();
+                    xhr.open('GET', url, false);
+                    xhr.send();
 
-                        var instrumented = sessionStorage['blanket_instrument_store-' + src];
+                    instrumented = _blanket.instrument({
+                        inputFile: xhr.responseText,
+                        inputFileName: url
+                    });
 
-                        if (instrumented) {
-                            value = 'data:text/javascript,' + instrumented;
-                        } else {
-                            value = src;
-                        }
-                    }
-                });
+                    _blanket.utils.cache[url] = { loadded: true };
+                }
+
+                _blanket.utils.blanketEval(instrumented);
+
+                if (child.onload) {
+                    child.onload();
+                }
+
+                return;
             }
 
-            return element;
+            return original.call(this, child);
         };
 
     })();
@@ -5606,12 +5621,10 @@ blanket.defaultReporter = function(coverage) {
 
         // Detect url paramenter of XMLHttpRequest.prototype.open whether url has been
         // instrumented. If exist use instrumented, otherwise load it as default. 
-        var originalCall = window.XMLHttpRequest.prototype.open;
+        var original = window.XMLHttpRequest.prototype.open;
 
         window.XMLHttpRequest.prototype.open = function(method, url) {
-            url = (url.indexOf('://') === -1) ? blanket.utils.qualifyURL(url) : url;
-
-            var instrumented = sessionStorage['blanket_instrument_store-' + url];
+            var instrumented = sessionStorage['blanket_instrument_store-' + blanket.utils.qualifyURL(url)];
 
             if (instrumented) {
                 Object.defineProperties(this, {
@@ -5628,7 +5641,7 @@ blanket.defaultReporter = function(coverage) {
                 });
             }
 
-            return originalCall.apply(this, Array.prototype.slice.call(arguments));
+            return original.apply(this, Array.prototype.slice.call(arguments));
         };
 
     })();
