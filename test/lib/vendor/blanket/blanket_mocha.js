@@ -5572,6 +5572,67 @@ blanket.defaultReporter = function(coverage) {
 
     })();
 
+    (function() {
+
+        // Detect src paramenter of document.createElement whether src has been
+        // instrumented. If exist use instrumented, otherwise load it as default.
+        var originalCall = window.document.createElement;
+
+        window.document.createElement = function(tagName) {
+            var element = originalCall.call(document, tagName);
+
+            if (tagName === 'script') {
+                Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+                    set: function (src) {
+                        src = (src.indexOf('://') === -1) ? blanket.utils.qualifyURL(src) : src;
+
+                        var instrumented = sessionStorage['blanket_instrument_store-' + src];
+
+                        if (instrumented) {
+                            value = 'data:text/javascript,' + instrumented;
+                        } else {
+                            value = src;
+                        }
+                    }
+                });
+            }
+
+            return element;
+        };
+
+    })();
+
+    (function() {
+
+        // Detect url paramenter of XMLHttpRequest.prototype.open whether url has been
+        // instrumented. If exist use instrumented, otherwise load it as default. 
+        var originalCall = window.XMLHttpRequest.prototype.open;
+
+        window.XMLHttpRequest.prototype.open = function(method, url) {
+            url = (url.indexOf('://') === -1) ? blanket.utils.qualifyURL(url) : url;
+
+            var instrumented = sessionStorage['blanket_instrument_store-' + url];
+
+            if (instrumented) {
+                Object.defineProperties(this, {
+                    'response': {
+                        get: function () {
+                            return instrumented;
+                        }
+                    },
+                    'responseText': {
+                        get: function () {
+                            return instrumented;
+                        }
+                    }
+                });
+            }
+
+            return originalCall.apply(this, Array.prototype.slice.call(arguments));
+        };
+
+    })();
+
 })(blanket);
 
 (function() {

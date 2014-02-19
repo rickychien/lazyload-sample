@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" type="text/css" href="/test/lib/vendor/mocha/mocha.css">
   <script src="/test/lib/vendor/mocha/mocha.js"></script>
-  <script src="/test/lib/vendor/blanket/blanket_mocha.js" data-cover-only="/app/js/"></script>
+  <script src="/test/lib/vendor/blanket/blanket_mocha.js" data-cover-only="/app/js/" data-cover-flags="instrumentCache"></script>
   <script>
     mocha.setup('tdd');
 
@@ -31,18 +31,21 @@
 
     <div id="sample2">
       <h3>XHR (Ajax)</h3>
+      <script src="/app/js/welcome2.js"></script>
       <script src="/app/js/sample2.js"></script>
       <script src="/test/unit/sample2-test.js"></script>
     </div>
 
     <div id="sample3">
       <h3>Head.appendChild</h3>
+      <script src="/app/js/welcome3.js"></script>
       <script src="/app/js/sample3.js"></script>
       <script src="/test/unit/sample3-test.js"></script>
     </div>
 
     <div id="sample4">
       <h3>Load on demand</h3>
+      <script src="/app/js/welcome4.js"></script>
       <script src="/app/js/sample4.js"></script>
       <script src="/test/unit/sample4-test.js"></script>
     </div>
