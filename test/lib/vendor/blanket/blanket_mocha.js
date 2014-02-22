@@ -5589,25 +5589,41 @@ blanket.defaultReporter = function(coverage) {
                 instrumented = sessionStorage[cacheUrl],
                 xhr;
 
+            // We want to cover the script which pass the filter
             if (child.tagName === 'SCRIPT' && _blanket.utils.filter([child]).length > 0) {
+
+                // If the script doesn't instrument yet, we download then instrument
                 if (!instrumented) {
                     xhr = new XMLHttpRequest();
                     xhr.open('GET', url, false);
-                    xhr.send();
 
-                    instrumented = _blanket.instrument({
-                        inputFile: xhr.responseText,
-                        inputFileName: url
-                    });
+                    xhr.onreadystatechange = function(evt) {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                instrumented = _blanket.instrument({
+                                    inputFile: xhr.responseText,
+                                    inputFileName: url
+                                });
+                                _blanket.utils.cache[url] = { loadded: true };
+                            } else {
+                                console.log('Blanket cannot fetch file : ' + url + ' , so skip it\'s instrumenting');
+                                instrumented = '';
+                                child.dispatchEvent(new Event('error'));
+                            }
+                        }
+                    };
 
-                    _blanket.utils.cache[url] = { loadded: true };
+                    try {
+                        xhr.send();
+                    } catch (error) {
+                        console.log('Blanket encounter a network error when fetching file');
+                        throw error;
+                    }
                 }
 
                 _blanket.utils.blanketEval(instrumented);
 
-                if (child.onload) {
-                    child.onload();
-                }
+                child.dispatchEvent(new Event('load'));
 
                 return;
             }
@@ -5617,6 +5633,35 @@ blanket.defaultReporter = function(coverage) {
 
     })();
 
+    !function(Object, getPropertyDescriptor, getPropertyNames){
+        // (C) WebReflection - Mit Style License
+        if (!(getPropertyDescriptor in Object)) {
+            var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+            Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
+                var proto = o, descriptor;
+                while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
+                    proto = proto.__proto__;
+                }
+                return descriptor;
+            };
+        }
+
+        if (!(getPropertyNames in Object)) {
+            var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
+            Object[getPropertyNames] = function getPropertyNames(o) {
+                var proto = o, unique = {}, names, i;
+
+                while (proto != ObjectProto) {
+                    for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
+                        unique[names[i]] = true;
+                    }
+                    proto = proto.__proto__;
+                }
+                return keys(unique);
+            };
+        }
+    }(Object, "getPropertyDescriptor", "getPropertyNames");
+
     (function() {
 
         // Detect url paramenter of XMLHttpRequest.prototype.open whether url has been
@@ -5624,21 +5669,30 @@ blanket.defaultReporter = function(coverage) {
         var original = window.XMLHttpRequest.prototype.open;
 
         window.XMLHttpRequest.prototype.open = function(method, url) {
-            var instrumented = sessionStorage['blanket_instrument_store-' + blanket.utils.qualifyURL(url)];
+            var instrumented = sessionStorage['blanket_instrument_store-' + blanket.utils.qualifyURL(url)],
+                originalResponse = Object.getPropertyDescriptor(this, 'response'),
+                originalResponseText = Object.getPropertyDescriptor(this, 'responseText');
 
-            if (instrumented) {
-                Object.defineProperties(this, {
-                    'response': {
-                        get: function () {
-                            return instrumented;
+            if (method.toUpperCase() === 'GET') {
+                if (instrumented) {
+                    Object.defineProperties(this, {
+                        'response': {
+                            get: function () {
+                                return instrumented;
+                            }
+                        },
+                        'responseText': {
+                            get: function () {
+                                return instrumented;
+                            }
                         }
-                    },
-                    'responseText': {
-                        get: function () {
-                            return instrumented;
-                        }
-                    }
-                });
+                    });
+                } else {
+                    Object.defineProperties(this, {
+                        'response': originalResponse,
+                        'responseText': originalResponseText
+                    });
+                }
             }
 
             return original.apply(this, Array.prototype.slice.call(arguments));
