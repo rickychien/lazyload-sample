@@ -4575,7 +4575,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
         _addScript: function(data) {
             var script = document.createElement("script");
-            script.type = "text/javascript";
             script.text = data;
             (document.body || document.getElementsByTagName('head')[0]).appendChild(script);
         },
@@ -4647,7 +4646,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
             var scripts = _blanket.utils.collectPageScripts();
 
-            // _blanket.options("filter",scripts);
             if (scripts.length === 0) {
                 callback();
             } else {
@@ -4691,6 +4689,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                         var check = function() {
                             if (allLoaded()) {
+                                enableLazyLoadingCoverage();
+
                                 if (_blanket.options("debug")) {
                                     console.log("BLANKET-All files loaded, init start test runner callback.");
                                 }
@@ -4724,7 +4724,8 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 // http://stackoverflow.com/questions/470832/getting-an-absolute-url-from-a-relative-one-ie6-issue
                 var a = document.createElement('a');
                 a.href = url;
-                return a.href;
+                // We ignore url paramenter if sufix match "?" character
+                return a.href.substr(0, a.href.indexOf('?') === -1 ? a.href.length : a.href.indexOf('?'));
             }
         }
 
@@ -5198,7 +5199,6 @@ blanket.defaultReporter = function(coverage) {
                         var pattenArr = pattern.slice(1, pattern.length - 1).split(",");
                         return pattenArr.some(function(elem) {
                             return _blanket.utils.matchPatternAttribute(filename, _blanket.utils.normalizeBackslashes(elem.slice(1, -1)));
-                            // return filename.indexOf(_blanket.utils.normalizeBackslashes(elem.slice(1,-1))) > -1;
                         });
                     } else if (pattern.indexOf("//") === 0) {
                         var ex = pattern.slice(2, pattern.lastIndexOf('/')),
@@ -5226,9 +5226,9 @@ blanket.defaultReporter = function(coverage) {
                 _blanket._addScript(data);
             },
 
-            filter: function (scripts) {
+            filter: function(scripts) {
                 var toArray = Array.prototype.slice,
-                    filter = _blanket.options('filter'),
+                    filter = _blanket.options("filter"),
                     antifilter = _blanket.options("antifilter");
 
                 return toArray.call(scripts).filter(function(script) {
@@ -5253,10 +5253,6 @@ blanket.defaultReporter = function(coverage) {
                             return sn.nodeName === "src";
                         })[0].nodeValue);
                 });
-
-                if (!filter) {
-                    _blanket.options("filter", "['" + scriptNames.join("','") + "']");
-                }
 
                 return scriptNames;
             },
@@ -5577,128 +5573,129 @@ blanket.defaultReporter = function(coverage) {
 
     })();
 
-    (function() {
+    window.enableLazyLoadingCoverage = function enableLazyLoadingCoverage() {
+
+        !function(Object, getPropertyDescriptor, getPropertyNames){
+            // (C) WebReflection - Mit Style License
+            if (!(getPropertyDescriptor in Object)) {
+                var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+                Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
+                    var proto = o, descriptor;
+                    while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
+                        proto = proto.__proto__;
+                    }
+                    return descriptor;
+                };
+            }
+
+            if (!(getPropertyNames in Object)) {
+                var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
+                Object[getPropertyNames] = function getPropertyNames(o) {
+                    var proto = o, unique = {}, names, i;
+                    while (proto != ObjectProto) {
+                        for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
+                            unique[names[i]] = true;
+                        }
+                        proto = proto.__proto__;
+                    }
+                    return keys(unique);
+                };
+            }
+        }(Object, "getPropertyDescriptor", "getPropertyNames");
+
+        // Detect url paramenter of XMLHttpRequest.prototype.open whether url has been
+        // instrumented. If exist use instrumented, otherwise load it as default.
+        var originalOpen = window.XMLHttpRequest.prototype.open;
+
+        window.XMLHttpRequest.prototype.open = function(method, url) {
+            var instrumented,
+                originalResponse = Object.getPropertyDescriptor(this, 'response'),
+                originalResponseText = Object.getPropertyDescriptor(this, 'responseText'),
+                fakeScript = { src: url },
+                xhr;
+
+            if (method.toUpperCase() === 'GET' && _blanket.utils.filter([fakeScript]).length > 0) {
+                url = blanket.utils.qualifyURL(url);
+                instrumented = sessionStorage['blanket_instrument_store-' + url];
+
+                if (!instrumented) {
+                    xhr = new XMLHttpRequest();
+                    originalOpen.call(xhr, 'GET', url, false);
+                    xhr.send(null);
+
+                    if (xhr.status === 200) {
+                        instrumented = _blanket.instrument({
+                            inputFile: xhr.responseText,
+                            inputFileName: url
+                        });
+                    } else {
+                        console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
+                    }
+                }
+
+                Object.defineProperties(this, {
+                    'response': {
+                        get: function() {
+                            return instrumented;
+                        }
+                    },
+                    'responseText': {
+                        get: function() {
+                            return instrumented;
+                        }
+                    }
+                });
+            } else {
+                Object.defineProperties(this, {
+                    'response': originalResponse,
+                    'responseText': originalResponseText
+                });
+            }
+
+            return originalOpen.apply(this, Array.prototype.slice.call(arguments));
+        };
 
         // Detect src paramenter of document.createElement whether src has been
         // instrumented. If exist use instrumented, otherwise load it as default.
-        var original = window.HTMLElement.prototype.appendChild;
+        var originalAppendChild = window.HTMLElement.prototype.appendChild;
 
-        window.HTMLElement.prototype.appendChild = function(child) {
-            var url = blanket.utils.qualifyURL(child.src),
-                cacheUrl = 'blanket_instrument_store-' + url,
-                instrumented = sessionStorage[cacheUrl],
+        window.HTMLElement.prototype.appendChild = function(element) {
+            var instrumented,
+                url,
                 xhr;
 
             // We want to cover the script which pass the filter
-            if (child.tagName === 'SCRIPT' && _blanket.utils.filter([child]).length > 0) {
+            if (element.tagName === 'SCRIPT' && _blanket.utils.filter([element]).length > 0) {
+                url = blanket.utils.qualifyURL(element.src);
+                instrumented = sessionStorage['blanket_instrument_store-' + url];
 
                 // If the script doesn't instrument yet, we download then instrument
                 if (!instrumented) {
                     xhr = new XMLHttpRequest();
                     xhr.open('GET', url, false);
+                    xhr.send(null);
 
-                    xhr.onreadystatechange = function(evt) {
-                        if (xhr.readyState === 4) {
-                            if (xhr.status === 200) {
-                                instrumented = _blanket.instrument({
-                                    inputFile: xhr.responseText,
-                                    inputFileName: url
-                                });
-                                _blanket.utils.cache[url] = { loadded: true };
-                            } else {
-                                console.log('Blanket cannot fetch file : ' + url + ' , so skip it\'s instrumenting');
-                                instrumented = '';
-                                child.dispatchEvent(new Event('error'));
-                            }
-                        }
-                    };
-
-                    try {
-                        xhr.send();
-                    } catch (error) {
-                        console.log('Blanket encounter a network error when fetching file');
-                        throw error;
+                    if (xhr.status === 200) {
+                        instrumented = _blanket.instrument({
+                            inputFile: xhr.responseText,
+                            inputFileName: url
+                        });
+                    } else {
+                        console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
+                        element.dispatchEvent(new Event('error'));
                     }
                 }
 
                 _blanket.utils.blanketEval(instrumented);
-
-                child.dispatchEvent(new Event('load'));
+                element.dispatchEvent(new Event('load'));
 
                 return;
             }
 
-            return original.call(this, child);
+            return originalAppendChild.call(this, element);
         };
 
-    })();
-
-    !function(Object, getPropertyDescriptor, getPropertyNames){
-        // (C) WebReflection - Mit Style License
-        if (!(getPropertyDescriptor in Object)) {
-            var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-            Object[getPropertyDescriptor] = function getPropertyDescriptor(o, name) {
-                var proto = o, descriptor;
-                while (proto && !(descriptor = getOwnPropertyDescriptor(proto, name))) {
-                    proto = proto.__proto__;
-                }
-                return descriptor;
-            };
-        }
-
-        if (!(getPropertyNames in Object)) {
-            var getOwnPropertyNames = Object.getOwnPropertyNames, ObjectProto = Object.prototype, keys = Object.keys;
-            Object[getPropertyNames] = function getPropertyNames(o) {
-                var proto = o, unique = {}, names, i;
-
-                while (proto != ObjectProto) {
-                    for (names = getOwnPropertyNames(proto), i = 0; i < names.length; i++) {
-                        unique[names[i]] = true;
-                    }
-                    proto = proto.__proto__;
-                }
-                return keys(unique);
-            };
-        }
-    }(Object, "getPropertyDescriptor", "getPropertyNames");
-
-    (function() {
-
-        // Detect url paramenter of XMLHttpRequest.prototype.open whether url has been
-        // instrumented. If exist use instrumented, otherwise load it as default. 
-        var original = window.XMLHttpRequest.prototype.open;
-
-        window.XMLHttpRequest.prototype.open = function(method, url) {
-            var instrumented = sessionStorage['blanket_instrument_store-' + blanket.utils.qualifyURL(url)],
-                originalResponse = Object.getPropertyDescriptor(this, 'response'),
-                originalResponseText = Object.getPropertyDescriptor(this, 'responseText');
-
-            if (method.toUpperCase() === 'GET') {
-                if (instrumented) {
-                    Object.defineProperties(this, {
-                        'response': {
-                            get: function () {
-                                return instrumented;
-                            }
-                        },
-                        'responseText': {
-                            get: function () {
-                                return instrumented;
-                            }
-                        }
-                    });
-                } else {
-                    Object.defineProperties(this, {
-                        'response': originalResponse,
-                        'responseText': originalResponseText
-                    });
-                }
-            }
-
-            return original.apply(this, Array.prototype.slice.call(arguments));
-        };
-
-    })();
+    };
 
 })(blanket);
 
