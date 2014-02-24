@@ -4139,7 +4139,9 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                 instrumented = sessionStorage.getItem("blanket_instrument_store-" + inFileName);
             } else {
-                var sourceArray = _blanket._prepareSource(inFile);
+                var sourceArray = _blanket._prepareSource(inFile),
+                    cache = _blanket.utils.cache[inFileName];
+
                 _blanket._trackingArraySetup = [];
                 // remove shebang
                 inFile = inFile.replace(/^\#\!.*/, "");
@@ -4150,6 +4152,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 }, _blanket._addTracking(inFileName));
 
                 instrumented = _blanket._trackingSetup(inFileName, sourceArray) + instrumented;
+                cache ? cache.loaded = true : _blanket.utils.cache[inFileName] = { loaded: true };
 
                 if (_blanket.options("sourceURL")) {
                     instrumented += "\n//@ sourceURL=" + inFileName.replace("http://", "");
@@ -5312,16 +5315,8 @@ blanket.defaultReporter = function(coverage) {
             },
 
             attachScript: function(options, cb) {
-                var timeout = _blanket.options("timeout") || 3000;
-
-                setTimeout(function() {
-                    if (!_blanket.utils.cache[options.url].loaded) {
-                        throw new Error("error loading source script");
-                    }
-                }, timeout);
-
-                _blanket.utils.getFile(options.url, cb, function() {
-                    throw new Error("error loading source script");
+                _blanket.utils.getFile(options.url, cb, function(error) {
+                    throw new Error("error loading source script " + error);
                 });
             },
 
@@ -5603,11 +5598,11 @@ blanket.defaultReporter = function(coverage) {
             }
         }(Object, "getPropertyDescriptor", "getPropertyNames");
 
-        // Detect url paramenter of XMLHttpRequest.prototype.open whether url has been
-        // instrumented. If exist use instrumented, otherwise load it as default.
-        var originalOpen = window.XMLHttpRequest.prototype.open;
+        // Detect url paramenter of XMLHttpRequest.prototype.open. If url has been
+        // instrumented, use instrumented, otherwise load it as default.
+        var proxyXHROpen = XMLHttpRequest.prototype.open;
 
-        window.XMLHttpRequest.prototype.open = function(method, url) {
+        XMLHttpRequest.prototype.open = function(method, url) {
             var instrumented,
                 originalResponse = Object.getPropertyDescriptor(this, 'response'),
                 originalResponseText = Object.getPropertyDescriptor(this, 'responseText'),
@@ -5620,7 +5615,7 @@ blanket.defaultReporter = function(coverage) {
 
                 if (!instrumented) {
                     xhr = new XMLHttpRequest();
-                    originalOpen.call(xhr, 'GET', url, false);
+                    proxyXHROpen.call(xhr, 'GET', url, false);
                     xhr.send(null);
 
                     if (xhr.status === 200) {
@@ -5652,15 +5647,14 @@ blanket.defaultReporter = function(coverage) {
                 });
             }
 
-            return originalOpen.apply(this, Array.prototype.slice.call(arguments));
+            return proxyXHROpen.apply(this, Array.prototype.slice.call(arguments));
         };
 
-        // Detect src paramenter of document.createElement whether src has been
-        // instrumented. If exist use instrumented, otherwise load it as default.
-        var originalAppendChild = window.HTMLElement.prototype.appendChild;
-
-        window.HTMLElement.prototype.appendChild = function(element) {
-            var instrumented,
+        // Detect src paramenter in DOM inject behavior function. If src has been
+        // instrumented, use instrumented source, otherwise load it as default.
+        var attachScriptToDom = function(proxy, element) {
+            var args = Array.prototype.slice.call(arguments, 1),
+                instrumented,
                 url,
                 xhr;
 
@@ -5669,7 +5663,7 @@ blanket.defaultReporter = function(coverage) {
                 url = blanket.utils.qualifyURL(element.src);
                 instrumented = sessionStorage['blanket_instrument_store-' + url];
 
-                // If the script doesn't instrument yet, we download then instrument
+                // If the script doesn't instrument yet, we download it
                 if (!instrumented) {
                     xhr = new XMLHttpRequest();
                     xhr.open('GET', url, false);
@@ -5687,17 +5681,39 @@ blanket.defaultReporter = function(coverage) {
                     }
                 }
 
+                // Attach script to DOM to force it executes immediately
                 element.removeAttribute('src');
                 element.text = instrumented;
-                originalAppendChild.call(this, element);
+                proxy.apply(this, args);
                 element.dispatchEvent(new Event('load'));
 
                 return;
             }
 
-            return originalAppendChild.call(this, element);
+            return proxy.apply(this, args);
+        }
+
+        var proxyAppendChild = HTMLElement.prototype.appendChild,
+            proxyInsertBefore = HTMLElement.prototype.insertBefore,
+            proxyReplaceChild = HTMLElement.prototype.replaceChild;
+
+        HTMLElement.prototype.appendChild = function() {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(proxyAppendChild);
+            attachScriptToDom.apply(this, args);
         };
 
+        HTMLElement.prototype.insertBefore = function() {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(proxyInsertBefore);
+            attachScriptToDom.apply(this, args);
+        };
+
+        HTMLElement.prototype.replaceChild = function() {
+            var args = Array.prototype.slice.call(arguments);
+            args.unshift(proxyReplaceChild);
+            attachScriptToDom.apply(this, args);
+        };
     };
 
 })(blanket);
