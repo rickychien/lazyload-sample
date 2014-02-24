@@ -5652,15 +5652,15 @@ blanket.defaultReporter = function(coverage) {
 
         // Detect src paramenter in DOM inject behavior function. If src has been
         // instrumented, use instrumented source, otherwise load it as default.
-        var attachScriptToDom = function(proxy, element) {
-            var args = Array.prototype.slice.call(arguments, 1),
+        var attachScriptToDom = function(proxy, returnNode, newElement) {
+            var args = Array.prototype.slice.call(arguments, 2),
                 instrumented,
                 url,
                 xhr;
 
             // We want to cover the script which pass the filter
-            if (element.tagName === 'SCRIPT' && _blanket.utils.filter([element]).length > 0) {
-                url = blanket.utils.qualifyURL(element.src);
+            if (newElement.tagName === 'SCRIPT' && _blanket.utils.filter([newElement]).length > 0) {
+                url = blanket.utils.qualifyURL(newElement.src);
                 instrumented = sessionStorage['blanket_instrument_store-' + url];
 
                 // If the script doesn't instrument yet, we download it
@@ -5676,18 +5676,18 @@ blanket.defaultReporter = function(coverage) {
                         });
                     } else {
                         console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
-                        element.dispatchEvent(new Event('error'));
-                        return;
+                        newElement.dispatchEvent(new Event('error'));
+                        return returnNode;
                     }
                 }
 
                 // Attach script to DOM to force it executes immediately
-                element.removeAttribute('src');
-                element.text = instrumented;
+                newElement.removeAttribute('src');
+                newElement.text = instrumented;
                 proxy.apply(this, args);
-                element.dispatchEvent(new Event('load'));
+                newElement.dispatchEvent(new Event('load'));
 
-                return;
+                return returnNode;
             }
 
             return proxy.apply(this, args);
@@ -5697,22 +5697,28 @@ blanket.defaultReporter = function(coverage) {
             proxyInsertBefore = HTMLElement.prototype.insertBefore,
             proxyReplaceChild = HTMLElement.prototype.replaceChild;
 
-        HTMLElement.prototype.appendChild = function() {
+        HTMLElement.prototype.appendChild = function(newElement) {
             var args = Array.prototype.slice.call(arguments);
+            args.unshift(newElement);
             args.unshift(proxyAppendChild);
-            attachScriptToDom.apply(this, args);
+
+            return attachScriptToDom.apply(this, args);
         };
 
-        HTMLElement.prototype.insertBefore = function() {
+        HTMLElement.prototype.insertBefore = function(newElement, referenceElement) {
             var args = Array.prototype.slice.call(arguments);
+            args.unshift(newElement);
             args.unshift(proxyInsertBefore);
-            attachScriptToDom.apply(this, args);
+
+            return attachScriptToDom.apply(this, args);
         };
 
-        HTMLElement.prototype.replaceChild = function() {
+        HTMLElement.prototype.replaceChild = function(newElement, oldElement) {
             var args = Array.prototype.slice.call(arguments);
+            args.unshift(oldElement);
             args.unshift(proxyReplaceChild);
-            attachScriptToDom.apply(this, args);
+
+            return attachScriptToDom.apply(this, args);
         };
     };
 
