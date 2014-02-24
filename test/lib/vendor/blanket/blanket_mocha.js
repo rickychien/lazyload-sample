@@ -5683,10 +5683,13 @@ blanket.defaultReporter = function(coverage) {
                     } else {
                         console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
                         element.dispatchEvent(new Event('error'));
+                        return;
                     }
                 }
 
-                _blanket.utils.blanketEval(instrumented);
+                element.removeAttribute('src');
+                element.text = instrumented;
+                originalAppendChild.call(this, element);
                 element.dispatchEvent(new Event('load'));
 
                 return;
