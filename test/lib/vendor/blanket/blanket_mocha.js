@@ -5609,7 +5609,10 @@ blanket.defaultReporter = function(coverage) {
                 fakeScript = { src: url },
                 xhr;
 
-            if (method.toUpperCase() === 'GET' && _blanket.utils.filter([fakeScript]).length > 0) {
+            if (method.toUpperCase() === 'GET' &&
+                _blanket.utils.filter([fakeScript]).length > 0 &&
+                url.indexOf('.js') > 0) {
+
                 url = blanket.utils.qualifyURL(url);
                 instrumented = sessionStorage['blanket_instrument_store-' + url];
 
@@ -5623,6 +5626,7 @@ blanket.defaultReporter = function(coverage) {
                             inputFile: xhr.responseText,
                             inputFileName: url
                         });
+                        console.log(instrumented);
                     } else {
                         console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
                     }
@@ -5666,7 +5670,7 @@ blanket.defaultReporter = function(coverage) {
                 // If the script doesn't instrument yet, we download it
                 if (!instrumented) {
                     xhr = new XMLHttpRequest();
-                    xhr.open('GET', url, false);
+                    proxyXHROpen.call(xhr, 'GET', url, false);
                     xhr.send(null);
 
                     if (xhr.status === 200) {
@@ -5676,7 +5680,16 @@ blanket.defaultReporter = function(coverage) {
                         });
                     } else {
                         console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
-                        newElement.dispatchEvent(new Event('error'));
+
+                        if (newElement.async) {
+                            setTimeout(function () {
+                                newElement.dispatchEvent(new Event('error'));
+                            }.bind(this));
+                        } else {
+                            newElement.dispatchEvent(new Event('error'));
+                        }
+
+
                         return returnNode;
                     }
                 }
@@ -5685,7 +5698,14 @@ blanket.defaultReporter = function(coverage) {
                 newElement.removeAttribute('src');
                 newElement.text = instrumented;
                 proxy.apply(this, args);
-                newElement.dispatchEvent(new Event('load'));
+
+                if (newElement.async) {
+                    setTimeout(function () {
+                        newElement.dispatchEvent(new Event('load'));
+                    }.bind(this));
+                } else {
+                    newElement.dispatchEvent(new Event('load'));
+                }
 
                 return returnNode;
             }
@@ -5693,11 +5713,11 @@ blanket.defaultReporter = function(coverage) {
             return proxy.apply(this, args);
         }
 
-        var proxyAppendChild = HTMLElement.prototype.appendChild,
-            proxyInsertBefore = HTMLElement.prototype.insertBefore,
-            proxyReplaceChild = HTMLElement.prototype.replaceChild;
+        var proxyAppendChild = Element.prototype.appendChild,
+            proxyInsertBefore = Element.prototype.insertBefore,
+            proxyReplaceChild = Element.prototype.replaceChild;
 
-        HTMLElement.prototype.appendChild = function(newElement) {
+        Element.prototype.appendChild = function(newElement) {
             var args = Array.prototype.slice.call(arguments);
             args.unshift(newElement);
             args.unshift(proxyAppendChild);
@@ -5705,7 +5725,7 @@ blanket.defaultReporter = function(coverage) {
             return attachScriptToDom.apply(this, args);
         };
 
-        HTMLElement.prototype.insertBefore = function(newElement, referenceElement) {
+        Element.prototype.insertBefore = function(newElement, referenceElement) {
             var args = Array.prototype.slice.call(arguments);
             args.unshift(newElement);
             args.unshift(proxyInsertBefore);
@@ -5713,7 +5733,7 @@ blanket.defaultReporter = function(coverage) {
             return attachScriptToDom.apply(this, args);
         };
 
-        HTMLElement.prototype.replaceChild = function(newElement, oldElement) {
+        Element.prototype.replaceChild = function(newElement, oldElement) {
             var args = Array.prototype.slice.call(arguments);
             args.unshift(oldElement);
             args.unshift(proxyReplaceChild);
