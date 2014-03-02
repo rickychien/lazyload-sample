@@ -1,4 +1,4 @@
-/*! blanket - v1.1.5 */ 
+/*! blanket - v1.1.5 */
 
 (function(define){
 
@@ -4692,8 +4692,6 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                         var check = function() {
                             if (allLoaded()) {
-                                enableLazyLoadingCoverage();
-
                                 if (_blanket.options("debug")) {
                                     console.log("BLANKET-All files loaded, init start test runner callback.");
                                 }
@@ -5175,7 +5173,7 @@ blanket.defaultReporter = function(coverage) {
     blanket.options(newOptions);
 
     if (typeof requirejs !== 'undefined') {
-        blanket.options("existingRequireJS", true);
+        // blanket.options("existingRequireJS", true);
     }
 
     /* setup requirejs loader, if needed */
@@ -5207,7 +5205,6 @@ blanket.defaultReporter = function(coverage) {
                         var ex = pattern.slice(2, pattern.lastIndexOf('/')),
                             mods = pattern.slice(pattern.lastIndexOf('/') + 1),
                             regex = new RegExp(ex, mods);
-
                         return regex.test(filename);
                     } else if (pattern.indexOf("#") === 0) {
                         return window[pattern.slice(1)].call(window, filename);
@@ -5231,12 +5228,12 @@ blanket.defaultReporter = function(coverage) {
 
             filter: function(scripts) {
                 var toArray = Array.prototype.slice,
-                    filter = _blanket.options("filter"),
-                    antifilter = _blanket.options("antifilter");
+                    match = _blanket.options("filter"),
+                    antiMatch = _blanket.options("antifilter");
 
                 return toArray.call(scripts).filter(function(script) {
-                    return _blanket.utils.matchPatternAttribute(script.src, filter) &&
-                        (typeof antifilter === "undefined" || !_blanket.utils.matchPatternAttribute(script.src, antifilter));
+                    return _blanket.utils.matchPatternAttribute(script.src, match) &&
+                        (typeof antiMatch === "undefined" || !_blanket.utils.matchPatternAttribute(script.src, antiMatch));
                 });
             },
 
@@ -5568,7 +5565,7 @@ blanket.defaultReporter = function(coverage) {
 
     })();
 
-    window.enableLazyLoadingCoverage = function enableLazyLoadingCoverage() {
+    (function enableLazyLoadCoverage() {
 
         !function(Object, getPropertyDescriptor, getPropertyNames){
             // (C) WebReflection - Mit Style License
@@ -5614,9 +5611,8 @@ blanket.defaultReporter = function(coverage) {
                 url.indexOf('.js') > 0) {
 
                 url = blanket.utils.qualifyURL(url);
-                instrumented = sessionStorage['blanket_instrument_store-' + url];
 
-                if (!instrumented) {
+                if (!_blanket.utils.cache[url]) {
                     xhr = new XMLHttpRequest();
                     proxyXHROpen.call(xhr, 'GET', url, false);
                     xhr.send(null);
@@ -5626,9 +5622,8 @@ blanket.defaultReporter = function(coverage) {
                             inputFile: xhr.responseText,
                             inputFileName: url
                         });
-                        console.log(instrumented);
                     } else {
-                        console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
+                        console.log('Blanket cannot use XMLHttpRequest to fetch file : ' + url + ' skip it\'s instrumenting');
                     }
                 }
 
@@ -5665,10 +5660,9 @@ blanket.defaultReporter = function(coverage) {
             // We want to cover the script which pass the filter
             if (newElement.tagName === 'SCRIPT' && _blanket.utils.filter([newElement]).length > 0) {
                 url = blanket.utils.qualifyURL(newElement.src);
-                instrumented = sessionStorage['blanket_instrument_store-' + url];
 
                 // If the script doesn't instrument yet, we download it
-                if (!instrumented) {
+                if (!_blanket.utils.cache[url]) {
                     xhr = new XMLHttpRequest();
                     proxyXHROpen.call(xhr, 'GET', url, false);
                     xhr.send(null);
@@ -5679,7 +5673,7 @@ blanket.defaultReporter = function(coverage) {
                             inputFileName: url
                         });
                     } else {
-                        console.log('Blanket cannot fetch file : ' + url + ' skip it\'s instrumenting');
+                        console.log('Blanket cannot use attachScriptToDom to fetch file : ' + url + ' skip it\'s instrumenting');
 
                         if (newElement.async) {
                             setTimeout(function () {
@@ -5689,18 +5683,17 @@ blanket.defaultReporter = function(coverage) {
                             newElement.dispatchEvent(new Event('error'));
                         }
 
-
                         return returnNode;
                     }
                 }
 
-                // Attach script to DOM to force it executes immediately
+                // Execute script
                 newElement.removeAttribute('src');
                 newElement.text = instrumented;
                 proxy.apply(this, args);
 
                 if (newElement.async) {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         newElement.dispatchEvent(new Event('load'));
                     }.bind(this));
                 } else {
@@ -5740,7 +5733,8 @@ blanket.defaultReporter = function(coverage) {
 
             return attachScriptToDom.apply(this, args);
         };
-    };
+
+    })();
 
 })(blanket);
 
