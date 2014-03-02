@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" type="text/css" href="/test/lib/vendor/mocha/mocha.css">
   <script src="/test/lib/vendor/mocha/mocha.js"></script>
-  <script src="/test/lib/vendor/blanket/blanket_mocha.js" data-cover-only="/app/js/" data-cover-flags="instrumentCache"></script>
+  <script src="/test/lib/vendor/blanket/blanket_mocha.js" data-cover-only="/app/js/" data-cover-flags="lazyload"></script>
   <script>
     mocha.setup('tdd');
 
@@ -53,9 +53,7 @@
   </div>
 
   <script>
-    window.onload = function () {
-      mocha.run();
-    };
+    mocha.run();
   </script>
 </body>
 </html>
