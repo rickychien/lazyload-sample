@@ -4139,8 +4139,7 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
 
                 instrumented = sessionStorage.getItem("blanket_instrument_store-" + inFileName);
             } else {
-                var sourceArray = _blanket._prepareSource(inFile),
-                    cache = _blanket.utils.cache[inFileName];
+                var sourceArray = _blanket._prepareSource(inFile);
 
                 _blanket._trackingArraySetup = [];
                 // remove shebang
@@ -4152,7 +4151,11 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
                 }, _blanket._addTracking(inFileName));
 
                 instrumented = _blanket._trackingSetup(inFileName, sourceArray) + instrumented;
-                cache ? cache.loaded = true : _blanket.utils.cache[inFileName] = { loaded: true };
+
+                _blanket.utils.cache[inFileName] = {
+                    loaded: true,
+                    instrumented: instrumented
+                };
 
                 if (_blanket.options("sourceURL")) {
                     instrumented += "\n//@ sourceURL=" + inFileName.replace("http://", "");
@@ -5625,6 +5628,8 @@ blanket.defaultReporter = function(coverage) {
                     } else {
                         console.log('Blanket cannot use XMLHttpRequest to fetch file : ' + url + ' skip it\'s instrumenting');
                     }
+                } else {
+                    instrumented = _blanket.utils.cache[url].instrumented;
                 }
 
                 Object.defineProperties(this, {
@@ -5674,17 +5679,10 @@ blanket.defaultReporter = function(coverage) {
                         });
                     } else {
                         console.log('Blanket cannot use attachScriptToDom to fetch file : ' + url + ' skip it\'s instrumenting');
-
-                        if (newElement.async) {
-                            setTimeout(function () {
-                                newElement.dispatchEvent(new Event('error'));
-                            }.bind(this));
-                        } else {
-                            newElement.dispatchEvent(new Event('error'));
-                        }
-
                         return returnNode;
                     }
+                } else {
+                    instrumented = _blanket.utils.cache[url].instrumented;
                 }
 
                 // Execute script
