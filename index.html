@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lazyload Sample Test</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="lib/mocha/mocha.css">
+  <script src="lib/mocha/mocha.js"></script>
+  <script src="lib/blanket/blanket.js" data-cover-only="src/" data-cover-flags="lazyload"></script>
+  <script type="text/javascript" src="lib/require/require.js"></script>
+  <script>
+    mocha.setup('tdd');
+
+    function assert(expr) {
+      if (!expr) {
+        throw new Error('failed');
+      }
+    }
+  </script>
+
+  <script src="src/moduleA.js"></script>
+  <script src="src/moduleA-html.js"></script>
+  <script src="test/moduleA-test.js"></script>
+
+  <script src="src/moduleB.js"></script>
+  <script src="src/moduleB-xhr.js"></script>
+  <script src="test/moduleB-test.js"></script>
+
+  <script src="src/moduleC.js"></script>
+  <script src="src/moduleC-appendchild.js"></script>
+  <script src="test/moduleC-test.js"></script>
+
+  <script>
+    window.addEventListener('load', function () {
+      require(['test/moduleD-test']);
+    });
+  </script>
+</head>
+<body>
+  <div id="mocha"></div>
+</body>
+</html>

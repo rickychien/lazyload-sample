@@ -1,11 +1,11 @@
 (function (exports) {
   'use strict';
 
-  function XHRLoader() {
+  function ModuleB_XHR() {
 
   }
 
-  XHRLoader.prototype = {
+  ModuleB_XHR.prototype = {
 
     load: function (url, callback) {
       var xhr = new XMLHttpRequest();
@@ -25,13 +25,13 @@
     },
 
     show: function () {
-      if (typeof Welcome2 === 'function') {
-        (new Welcome2('#sample2', 'I am sample2')).greets();
+      if (typeof ModuleB === 'function') {
+        return new ModuleB().greets();
       }
     }
 
   };
 
-  exports.Sample2 = XHRLoader;
+  exports.ModuleB_XHR = ModuleB_XHR;
 
 })(this);

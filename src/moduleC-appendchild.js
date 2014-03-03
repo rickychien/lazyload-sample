@@ -1,30 +1,27 @@
 (function (exports) {
   'use strict';
 
-  function ScriptLoader() {
+  function ModuleC_APPENDCHILD() {
 
   }
 
-  ScriptLoader.prototype = {
+  ModuleC_APPENDCHILD.prototype = {
 
     load: function (url, callback) {
       var script = document.createElement('script');
-
       script.src = url;
-
       script.onload = callback;
-
       document.querySelector('head').appendChild(script);
     },
 
     show: function () {
-      if (typeof Welcome3 === 'function') {
-        (new Welcome3('#sample3', 'I am sample3')).greets();
+      if (typeof ModuleC === 'function') {
+        return (new ModuleC()).greets();
       }
     }
 
   };
 
-  exports.Sample3 = ScriptLoader;
+  exports.ModuleC_APPENDCHILD = ModuleC_APPENDCHILD;
 
 })(this);
