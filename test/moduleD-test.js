@@ -16,9 +16,5 @@ suite('ModuleD_REQUIREJS', function() {
     test('should work correctly when require same module twice', function() {
       assert(target.show() === 'Hello!');
     });
-
-    test('should work correctly when require same module thrice', function() {
-      assert(target.show() === 'Hello!');
-    });
   });
 });

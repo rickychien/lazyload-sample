@@ -8,7 +8,6 @@ define(function() {
   ModuleD.prototype = {
 
     greets: function () {
-      require(['src/moduleD']);
       return 'Hello!';
     }
 
