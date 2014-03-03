@@ -4684,6 +4684,10 @@ var parseAndModify = (inBrowser ? window.falafel : require("falafel"));
             opts.coverage = typeof opts.coverage === "undefined" ? true : opts.coverage;
 
             if (opts.coverage) {
+                if (blanket.options("lazyload")) {
+                    _blanket.utils.lazyLoadCoverage();
+                }
+
                 _blanket._bindStartTestRunner(opts.bindEvent, function() {
                     _blanket._loadSourceFiles(function() {
                         var allLoaded = function() {
@@ -5653,21 +5657,34 @@ blanket.defaultReporter = function(coverage) {
 
                         // Execute script
                         newElement.removeAttribute('src');
+                        newElement.setAttribute('data-blanketappend', true);
                         newElement.text = instrumented;
                         proxy.apply(this, args);
-
-                        if (newElement.async) {
-                            setTimeout(function() {
-                                newElement.dispatchEvent(new Event('load'));
-                            }.bind(this));
-                        } else {
-                            newElement.dispatchEvent(new Event('load'));
-                        }
 
                         return returnNode;
                     }
 
                     return proxy.apply(this, args);
+                }
+
+                var addScriptEventObserver = function() {
+                    var observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            Array.prototype.slice.call(mutation.addedNodes).forEach(function(node) {
+                                if (node.tagName === 'SCRIPT' && node.getAttribute('data-blanketappend')) {
+                                    node.dispatchEvent(new Event('load'));
+                                }
+                            });
+                        });
+                    });
+                    observer.observe(document.head, { childList: true });
+                    observer.observe(document.body, { childList: true });
+                };
+
+                if (document.body) {
+                    addScriptEventObserver();
+                } else {
+                    document.addEventListener("DOMContentLoaded", addScriptEventObserver);
                 }
 
                 Element.prototype.appendChild = function(newElement) {
@@ -5730,10 +5747,6 @@ blanket.defaultReporter = function(coverage) {
         _blanket.utils.cacheXhrConstructor();
 
     })();
-
-    if (blanket.options("lazyload")) {
-        _blanket.utils.lazyLoadCoverage();
-    }
 
 })(blanket);
 
