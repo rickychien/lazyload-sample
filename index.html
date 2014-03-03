@@ -15,6 +15,8 @@
         throw new Error('failed');
       }
     }
+
+    require(['test/moduleD-test']);
   </script>
 
   <script src="src/moduleA.js"></script>
@@ -28,12 +30,6 @@
   <script src="src/moduleC.js"></script>
   <script src="src/moduleC-appendchild.js"></script>
   <script src="test/moduleC-test.js"></script>
-
-  <script>
-    window.addEventListener('load', function () {
-      require(['test/moduleD-test']);
-    });
-  </script>
 </head>
 <body>
   <div id="mocha"></div>
