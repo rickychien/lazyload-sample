@@ -11,13 +11,11 @@
       var script = document.createElement('script');
       script.src = url;
       script.onload = callback;
-      document.querySelector('head').appendChild(script);
+      document.head.appendChild(script);
     },
 
     show: function () {
-      if (typeof ModuleC === 'function') {
-        return (new ModuleC()).greets();
-      }
+      return new ModuleC().greets();
     }
 
   };

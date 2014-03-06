@@ -1,9 +1,9 @@
-suite('ModuleB_XHR', function () {
+suite('ModuleE_REPLACECHILD', function () {
   var module,
-      url = 'src/moduleB.js';
+      url = 'src/moduleE.js';
 
   suiteSetup(function () {
-    module = new ModuleB_XHR();
+    module = new ModuleE_REPLACECHILD();
   });
 
   suite('#show', function () {

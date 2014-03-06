@@ -1,11 +1,11 @@
 (function (exports) {
   'use strict';
 
-  function ModuleD () {
+  function ModuleE () {
 
   }
 
-  ModuleD.prototype = {
+  ModuleE.prototype = {
 
     greets: function () {
       return 'Hello!';
@@ -13,6 +13,6 @@
 
   };
 
-  exports.ModuleD = ModuleD;
+  exports.ModuleE = ModuleE;
 
 })(this);

@@ -16,20 +16,24 @@
       }
     }
 
-    require(['test/moduleD-test']);
+    require(['test/moduleX-test']);
   </script>
 
   <script src="src/moduleA.js"></script>
   <script src="src/moduleA-html.js"></script>
   <script src="test/moduleA-test.js"></script>
 
-  <script src="src/moduleB.js"></script>
   <script src="src/moduleB-xhr.js"></script>
   <script src="test/moduleB-test.js"></script>
 
-  <script src="src/moduleC.js"></script>
   <script src="src/moduleC-appendchild.js"></script>
   <script src="test/moduleC-test.js"></script>
+
+  <script src="src/moduleD-insertbefore.js"></script>
+  <script src="test/moduleD-test.js"></script>
+
+  <script src="src/moduleE-replacechild.js"></script>
+  <script src="test/moduleE-test.js"></script>
 </head>
 <body>
   <div id="mocha"></div>

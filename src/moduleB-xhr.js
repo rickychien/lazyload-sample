@@ -25,9 +25,7 @@
     },
 
     show: function () {
-      if (typeof ModuleB === 'function') {
-        return new ModuleB().greets();
-      }
+      return new ModuleB().greets();
     }
 
   };

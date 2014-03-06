@@ -1,20 +1,17 @@
-suite('ModuleD_REQUIREJS', function() {
-  var target;
+suite('ModuleD_INSERTBEFORE', function () {
+  var module,
+      url = 'src/moduleD.js';
 
-  setup(function (done) {
-    require(['src/moduleD-requirejs'], function (ModuleD_REQUIREJS) {
-      target = new ModuleD_REQUIREJS();
-      done();
-    });
+  suiteSetup(function () {
+    module = new ModuleD_INSERTBEFORE();
   });
 
   suite('#show', function () {
-    test('should return "Hello!"', function() {
-      assert(target.show() === 'Hello!');
-    });
-
-    test('should work correctly when require same module twice', function() {
-      assert(target.show() === 'Hello!');
+    test('should return "Hello!"', function (done) {
+      module.load(url, function () {
+        assert(module.show() === 'Hello!');
+        done();
+      });
     });
   });
 });

@@ -1,15 +1,15 @@
 suite('ModuleC_APPENDCHILD', function () {
-  var target,
-      url = 'src/moduleC-appendchild.js';
+  var module,
+      url = 'src/moduleC.js';
 
   suiteSetup(function () {
-    target = new ModuleC_APPENDCHILD();
+    module = new ModuleC_APPENDCHILD();
   });
 
   suite('#show', function () {
     test('should return "Hello!"', function (done) {
-      target.load(url, function () {
-        assert(target.show() === 'Hello!');
+      module.load(url, function () {
+        assert(module.show() === 'Hello!');
         done();
       });
     });
