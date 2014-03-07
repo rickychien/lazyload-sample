@@ -15,9 +15,7 @@
     },
 
     show: function () {
-      if (typeof ModuleD === 'function') {
-        return new ModuleD().greets();
-      }
+      return new ModuleD().greets();
     }
 
   };
