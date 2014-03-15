@@ -5636,8 +5636,7 @@ blanket.defaultReporter = function(coverage) {
                         url = blanket.utils.qualifyURL(newElement.src),
                         instrumented,
                         xhr,
-                        success = true,
-                        blob;
+                        success = true;
 
                     // Check whether script url pass the filter
                     if (newElement.nodeName === 'SCRIPT' &&
@@ -5667,8 +5666,10 @@ blanket.defaultReporter = function(coverage) {
 
                         // Execute instrumented script
                         if (success) {
-                            blob = new Blob([instrumented], {'type': 'text/plain'});
-                            newElement.src = URL.createObjectURL(blob);
+                            newElement.src = URL.createObjectURL(new Blob([instrumented]));
+                            newElement.addEventListener('load', function() {
+                                URL.revokeObjectURL(this.src);
+                            }, false);
                         }
                     }
 
