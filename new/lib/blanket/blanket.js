@@ -5675,19 +5675,19 @@ blanket.defaultReporter = function(coverage) {
                     return proxy.apply(this, args);
                 };
 
-                Element.prototype.appendChild = function(newElement) {
+                Element.prototype.appendChild = function() {
                     var args = Array.prototype.slice.call(arguments);
                     args.unshift(_proxyAppendChild);
                     return attachScriptToDom.apply(this, args);
                 };
 
-                Element.prototype.insertBefore = function(newElement, referenceElement) {
+                Element.prototype.insertBefore = function() {
                     var args = Array.prototype.slice.call(arguments);
                     args.unshift(_proxyInsertBefore);
                     return attachScriptToDom.apply(this, args);
                 };
 
-                Element.prototype.replaceChild = function(newElement, oldElement) {
+                Element.prototype.replaceChild = function() {
                     var args = Array.prototype.slice.call(arguments);
                     args.unshift(_proxyReplaceChild);
                     return attachScriptToDom.apply(this, args);
