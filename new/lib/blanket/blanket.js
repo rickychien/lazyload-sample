@@ -5669,10 +5669,8 @@ blanket.defaultReporter = function(coverage) {
 
                         // Execute instrumented script
                         if (success) {
-                            newElement.src = URL.createObjectURL(new Blob([instrumented]));
-                            newElement.addEventListener('load', function() {
-                                URL.revokeObjectURL(this.src);
-                            }, false);
+                            newElement.src = 'data:' + newElement.type + ';base64,' +
+                                btoa(unescape(encodeURIComponent(instrumented)));
                         }
                     }
 
