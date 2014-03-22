@@ -1,9 +1,9 @@
-suite('ModuleX_REQUIREJS', function() {
+suite('ModuleF_REQUIREJS', function() {
   var target;
 
   setup(function (done) {
-    require(['src/moduleX-requirejs'], function (ModuleD_REQUIREJS) {
-      target = new ModuleD_REQUIREJS();
+    require(['src/moduleF-requirejs'], function (ModuleF_REQUIREJS) {
+      target = new ModuleF_REQUIREJS();
       done();
     });
   });

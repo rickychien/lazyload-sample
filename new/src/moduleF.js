@@ -1,11 +1,11 @@
 define(function() {
   'use strict';
 
-  function ModuleX () {
+  function ModuleF () {
 
   }
 
-  ModuleX.prototype = {
+  ModuleF.prototype = {
 
     greets: function () {
       return 'Hello!';
@@ -13,5 +13,5 @@ define(function() {
 
   };
 
-  return ModuleX;
+  return ModuleF;
 });
