@@ -1,4 +1,4 @@
 lazyload-sample
 ===============
 
-A sample project for testing lazy load coverage
+A sample project for lazy loading coverage
