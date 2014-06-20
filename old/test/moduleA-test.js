@@ -7,7 +7,7 @@ suite('ModuleA_HTML', function () {
 
   suite('#show', function () {
     test('should return "Hello!"', function () {
-      assert(target.show() === 'Hello!');
+      expect(target.show()).to.equal('Hello!');
     });
   });
 });

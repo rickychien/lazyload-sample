@@ -10,11 +10,11 @@ suite('ModuleF_REQUIREJS', function() {
 
   suite('#show', function () {
     test('should return "Hello!"', function() {
-      assert(target.show() === 'Hello!');
+      expect(target.show()).to.equal('Hello!');
     });
 
     test('should work correctly when require same module twice', function() {
-      assert(target.show() === 'Hello!');
+      expect(target.show()).to.equal('Hello!');
     });
   });
 });

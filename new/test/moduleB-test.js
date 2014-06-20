@@ -9,7 +9,7 @@ suite('ModuleB_XHR', function () {
   suite('#show', function () {
     test('should return "Hello!"', function (done) {
       module.load(url, function () {
-        assert(module.show() === 'Hello!');
+        expect(module.show()).to.equal('Hello!');
         done();
       });
     });
