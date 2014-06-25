@@ -6,7 +6,7 @@
   <link rel="stylesheet" type="text/css" href="lib/mocha/mocha.css">
   <script src="lib/mocha/mocha.js"></script>
   <script src="lib/chai/chai.js"></script>
-  <script src="lib/blanket/blanket.js" data-cover-only="src/"></script>
+  <script src="lib/blanket/blanket.js" data-cover-only="//module[A-Z]{1}.js$/"></script>
   <script type="text/javascript" src="lib/require/require.js"></script>
   <script>
     mocha.setup('tdd');
